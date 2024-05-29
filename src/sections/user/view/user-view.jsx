@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { users } from 'src/_mock/user';
+// import { users } from 'src/_mock/user';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -31,36 +31,59 @@ export default function UserPage() {
 
   const [selected, setSelected] = useState([]);
 
-  const [orderBy, setOrderBy] = useState('name');
+  const [orderBy, setOrderBy] = useState('nombre');
 
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const [users, setUsers] = useState([]);
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [email, setEmail] = useState("");
+  // const [telefono, setTelefono] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [uid, setUid] = useState("");
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+
+    const response = await fetch(
+      "https://api-proyecto-sena-connect-ar-production.up.railway.app/users/all-users"
+    );
+    const data = await response.json();
+
+    setUsers(data);
+    console.log(data);
+    console.log("si sirve");
+};
 
 
-  const handleSort = (event, id) => {
-    const isAsc = orderBy === id && order === 'asc';
-    if (id !== '') {
+  const handleSort = (event, uid) => {
+    const isAsc = orderBy === uid && order === 'asc';
+    if (uid !== '') {
       setOrder(isAsc ? 'desc' : 'asc');
-      setOrderBy(id);
+      setOrderBy(uid);
     }
   };
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = users.map((n) => n.name);
+      const newSelecteds = users.map(nombre);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event, nombre) => {
+    const selectedIndex = selected.indexOf(nombre);
     let newSelected = [];
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, nombre);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -88,13 +111,13 @@ export default function UserPage() {
     setFilterName(event.target.value);
   };
 
-  const dataFiltered = applyFilter({
-    inputData: users,
-    comparator: getComparator(order, orderBy),
-    filterName,
-  });
+   const dataFiltered = applyFilter({
+     inputData: users,
+     comparator: getComparator(order, orderBy),
+     filterName,
+   });
 
-  const notFound = !dataFiltered.length && !!filterName;
+   const notFound = !dataFiltered.length && !!filterName;
 
   return (
     <Container>
@@ -127,8 +150,7 @@ export default function UserPage() {
                   { id: 'nombre', label: 'Nombre' },
                   { id: 'apellido', label: 'Apellido' },
                   { id: 'correo', label: 'Correo' },
-                  { id: 'telefono', label: 'Telefono', align: 'center' },
-                  { id: 'genero', label: 'Genero' },
+                  { id: 'ciudad', label: 'ciudad', align: 'center' },
                   { id: '' },
                 ]}
               />

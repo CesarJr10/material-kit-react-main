@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import PropTypes from 'prop-types';
 
 import Stack from '@mui/material/Stack';
@@ -18,14 +19,36 @@ import Iconify from 'src/components/iconify';
 
 export default function UserTableRow({
   selected,
-  name,
-  avatarUrl,
-  company,
-  role,
-  isVerified,
-  status,
   handleClick,
 }) {
+  const [users, setUsers] = useState([]);
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [email, setEmail] = useState("");
+  // const [telefono, setTelefono] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [departamento, setDepartamento] = useState("");
+  const [direccion, setDireccion] = useState("");
+  const [barrio, setBarrio] = useState("");
+  const [uid, setUid] = useState("");
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+
+    const response = await fetch(
+      "https://api-proyecto-sena-connect-ar-production.up.railway.app/users/all-users"
+    );
+    const data = await response.json();
+
+    setUsers(data);
+    console.log(data);
+    console.log("si sirve");
+};
+
+
   const [open, setOpen] = useState(null);
 
   const handleOpenMenu = (event) => {
@@ -45,21 +68,18 @@ export default function UserTableRow({
 
         <TableCell component="th" scope="row" padding="none">
           <Stack direction="row" alignItems="center" spacing={2}>
-            <Avatar alt={name} src={avatarUrl} />
             <Typography variant="subtitle2" noWrap>
-              {name}
+              {nombre}
             </Typography>
           </Stack>
         </TableCell>
 
-        <TableCell>{company}</TableCell>
+        <TableCell>{apellido}</TableCell>
 
-        <TableCell>{role}</TableCell>
-
-        <TableCell align="center">{isVerified ? 'Yes' : 'No'}</TableCell>
+        <TableCell>{email}</TableCell>
 
         <TableCell>
-          <Label color={(status === 'inactivo' && 'error') || 'success'}>{status}</Label>
+          <Label>{ciudad}</Label>
         </TableCell>
 
         <TableCell align="right">
@@ -94,12 +114,6 @@ export default function UserTableRow({
 }
 
 UserTableRow.propTypes = {
-  avatarUrl: PropTypes.any,
-  company: PropTypes.any,
   handleClick: PropTypes.func,
-  isVerified: PropTypes.any,
-  name: PropTypes.any,
-  role: PropTypes.any,
   selected: PropTypes.any,
-  status: PropTypes.string,
 };
