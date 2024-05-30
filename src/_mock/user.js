@@ -1,6 +1,6 @@
 import { sample } from 'lodash';
 import { faker } from '@faker-js/faker';
-// import UserList from './api-conexion';
+
 // ----------------------------------------------------------------------
 
 export const users = [...Array(24)].map((_, index) => ({

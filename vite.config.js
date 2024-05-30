@@ -28,6 +28,13 @@ export default defineConfig({
   },
   server: {
     port: 3030,
+    proxy: {
+      '/api': {
+        target: 'https://api-proyecto-sena-connect-ar-production.up.railway.app',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
   },
   preview: {
     port: 3030,

@@ -4,8 +4,6 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -27,20 +25,67 @@ export default function LoginView() {
 
   const router = useRouter();
 
+  const [correo, setCorreo] = useState("");
+  const [contrasena, setContrasena] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleClick = () => {
-    router.push('/dashboard');
+  
+
+  const handleSubmit = async (e) => {
+     e.preventDefault();
+
+    try {
+      const response = await fetch(
+        "/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ correo, contrasena }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+
+      const responseData = await response.json();
+      const {token} = responseData
+      localStorage.setItem("token", token);
+      console.log("Respuesta del servidor:",token);
+
+      console.log("Si sirve");
+      router.push('/dashboard');
+
+      // Aquí podrías manejar la respuesta del servidor, por ejemplo, guardar el token de sesión en el localStorage
+    } catch (error) {
+      console.error(
+        "Error al iniciar sesión:",
+        error.message,
+        correo,
+        contrasena
+      );
+      // setError("Credenciales incorrectas. Por favor, inténtalo de nuevo."); // Mensaje de error personalizado, podrías manejar diferentes tipos de errores aquí
+    }
   };
 
   const renderForm = (
     <>
       <Stack spacing={3}>
-        <TextField name="email" label="Email address" />
+        <TextField 
+          name="email" 
+          label="Email address" 
+          value={correo}
+          onChange={(e) => setCorreo(e.target.value)}
+        />
 
         <TextField
           name="password"
           label="Password"
+          value={contrasena}
+          onChange={(e) => setContrasena(e.target.value)}
           type={showPassword ? 'text' : 'password'}
           InputProps={{
             endAdornment: (
@@ -66,7 +111,6 @@ export default function LoginView() {
         type="submit"
         variant="contained"
         color="inherit"
-        onClick={handleClick}
       >
         Login
       </LoadingButton>
@@ -74,7 +118,7 @@ export default function LoginView() {
   );
 
   return (
-    <Box
+    <Box component="form" onSubmit={handleSubmit}
       sx={{
         ...bgGradient({
           color: alpha(theme.palette.background.default, 0.9),
@@ -99,54 +143,17 @@ export default function LoginView() {
             maxWidth: 420,
           }}
         >
-          <Typography variant="h4">Sign in to Minimal</Typography>
+          <Typography variant="h4">Sign in to Sena ConnectAR</Typography>
 
           <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
             Don’t have an account?
-            <Link variant="subtitle2" sx={{ ml: 0.5 }}>
+            <Link variant="subtitle2" sx={{ ml: 0.5 }} href='/register' >
               Get started
             </Link>
           </Typography>
 
-          <Stack direction="row" spacing={2}>
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-            >
-              <Iconify icon="eva:google-fill" color="#DF3E30" />
-            </Button>
-
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-            >
-              <Iconify icon="eva:facebook-fill" color="#1877F2" />
-            </Button>
-
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-            >
-              <Iconify icon="eva:twitter-fill" color="#1C9CEA" />
-            </Button>
-          </Stack>
-
-          <Divider sx={{ my: 3 }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              OR
-            </Typography>
-          </Divider>
-
           {renderForm}
+
         </Card>
       </Stack>
     </Box>

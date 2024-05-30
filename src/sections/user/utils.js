@@ -29,6 +29,7 @@ function descendingComparator(a, b, orderBy) {
   }
   return 0;
 }
+
 export function getComparator(order, orderBy) {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
@@ -47,9 +48,29 @@ export function applyFilter({ inputData, comparator, filterName }) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
-    inputData = inputData.filter(
-      (user) => user.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
-    );
+    const filterNameLowerCase = filterName.toLowerCase();
+    inputData = inputData.filter((user) => {
+      // aquí me aseguro de que las propiedas existan:)
+      const name         = user.nombre ? user.nombre.toLowerCase() : '';
+      const apellido     = user.apellido ? user.apellido.toLowerCase() : '';
+      const correo       = user.email ? user.email.toLowerCase() : '';
+      const ciudad       = user.ciudad ? user.ciudad.toLowerCase() : '';
+      const departamento = user.departamento ? user.departamento.toLowerCase() : '';
+      const barrio       = user.barrio ? user.barrio.toLowerCase() : '';
+      const direccion    = user.direccion ? user.direccion.toLowerCase() : '';
+      const genero       = user.genero ? user.genero.toLowerCase() : '';
+
+      return (
+        name.includes(filterNameLowerCase) ||
+        apellido.includes(filterNameLowerCase) ||
+        correo.includes(filterNameLowerCase) ||
+        ciudad.includes(filterNameLowerCase) ||
+        departamento.includes(filterNameLowerCase) ||
+        barrio.includes(filterNameLowerCase) ||
+        direccion.includes(filterNameLowerCase) ||
+        genero.includes(filterNameLowerCase) 
+      );
+    });
   }
 
   return inputData;

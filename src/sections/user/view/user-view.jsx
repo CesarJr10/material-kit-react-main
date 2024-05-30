@@ -1,4 +1,4 @@
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -9,8 +9,7 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-
-// import { users } from 'src/_mock/user';
+import CircularProgress from '@mui/material/CircularProgress'; 
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -26,41 +25,29 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 
 export default function UserPage() {
   const [page, setPage] = useState(0);
-
   const [order, setOrder] = useState('asc');
-
   const [selected, setSelected] = useState([]);
-
   const [orderBy, setOrderBy] = useState('nombre');
-
   const [filterName, setFilterName] = useState('');
-
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
   const [users, setUsers] = useState([]);
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [email, setEmail] = useState("");
-  // const [telefono, setTelefono] = useState("");
-  const [ciudad, setCiudad] = useState("");
-  const [uid, setUid] = useState("");
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
-
-    const response = await fetch(
-      "https://api-proyecto-sena-connect-ar-production.up.railway.app/users/all-users"
-    );
-    const data = await response.json();
-
-    setUsers(data);
-    console.log(data);
-    console.log("si sirve");
-};
-
+    setLoading(true); 
+    try {
+      const response = await fetch('/api/users/all-users');
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+    setLoading(false); // Ocultar indicador de carga
+  };
 
   const handleSort = (event, uid) => {
     const isAsc = orderBy === uid && order === 'asc';
@@ -72,7 +59,7 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = users.map(nombre);
+      const newSelecteds = users.map((n) => n.nombre);
       setSelected(newSelecteds);
       return;
     }
@@ -111,13 +98,13 @@ export default function UserPage() {
     setFilterName(event.target.value);
   };
 
-   const dataFiltered = applyFilter({
-     inputData: users,
-     comparator: getComparator(order, orderBy),
-     filterName,
-   });
+  const dataFiltered = applyFilter({
+    inputData: users,
+    comparator: getComparator(order, orderBy),
+    filterName,
+  });
 
-   const notFound = !dataFiltered.length && !!filterName;
+  const notFound = !dataFiltered.length && !!filterName;
 
   return (
     <Container>
@@ -138,47 +125,56 @@ export default function UserPage() {
 
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
-                order={order}
-                orderBy={orderBy}
-                rowCount={users.length}
-                numSelected={selected.length}
-                onRequestSort={handleSort}
-                onSelectAllClick={handleSelectAllClick}
-                headLabel={[
-                  { id: 'nombre', label: 'Nombre' },
-                  { id: 'apellido', label: 'Apellido' },
-                  { id: 'correo', label: 'Correo' },
-                  { id: 'ciudad', label: 'ciudad', align: 'center' },
-                  { id: '' },
-                ]}
-              />
-              <TableBody>
-                {dataFiltered
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      name={row.name}
-                      role={row.role}
-                      status={row.status}
-                      company={row.company}
-                      avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
-                      selected={selected.indexOf(row.name) !== -1}
-                      handleClick={(event) => handleClick(event, row.name)}
-                    />
-                  ))}
-
-                <TableEmptyRows
-                  height={77}
-                  emptyRows={emptyRows(page, rowsPerPage, users.length)}
+            {loading ? (
+              <Stack alignItems="center" justifyContent="center" sx={{ py: 3 }}>
+                <CircularProgress /> 
+              </Stack>
+            ) : (
+              <Table sx={{ minWidth: 800 }}>
+                <UserTableHead
+                  order={order}
+                  orderBy={orderBy}
+                  rowCount={users.length}
+                  numSelected={selected.length}
+                  onRequestSort={handleSort}
+                  onSelectAllClick={handleSelectAllClick}
+                  headLabel={[
+                    { id: 'nombre', label: 'Nombre' },
+                    { id: 'apellido', label: 'Apellido' },
+                    { id: 'email', label: 'Correo' },
+                    { id: 'departamento', label: 'Departamento' },
+                    { id: 'ciudad', label: 'Ciudad' },
+                    { id: 'barrio', label: 'Barrio' },
+                    { id: 'direccion', label: 'Dirección' },
+                    { id: 'genero', label: 'Género' },
+                    { id: '' },
+                  ]}
                 />
+                <TableBody>
+                  {dataFiltered
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <UserTableRow
+                        key={row.id}
+                        name={row.nombre}
+                        secondName={row.apellido}
+                        correo={row.email}
+                        department={row.departamento}
+                        city={row.ciudad}
+                        hood={row.barrio}
+                        direction={row.direccion}
+                        gender={row.genero}
+                        selected={selected.indexOf(row.nombre) !== -1}
+                        handleClick={(event) => handleClick(event, row.nombre)}
+                      />
+                    ))}
 
-                {notFound && <TableNoData query={filterName} />}
-              </TableBody>
-            </Table>
+                  <TableEmptyRows height={77} emptyRows={emptyRows(page, rowsPerPage, users.length)} />
+
+                  {notFound && <TableNoData query={filterName} />}
+                </TableBody>
+              </Table>
+            )}
           </TableContainer>
         </Scrollbar>
 
