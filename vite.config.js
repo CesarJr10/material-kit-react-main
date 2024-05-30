@@ -27,7 +27,7 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 3030,
+    port: 3031,
     proxy: {
       '/api': {
         target: 'https://api-proyecto-sena-connect-ar-production.up.railway.app',
@@ -37,6 +37,6 @@ export default defineConfig({
     }
   },
   preview: {
-    port: 3030,
+    port: 3031,
   },
 });
