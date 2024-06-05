@@ -1,4 +1,4 @@
-
+import { useState,useEffect } from 'react';
 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -9,10 +9,18 @@ import Typography from '@mui/material/Typography';
 // ----------------------------------------------------------------------
 
 export default function AppView() {
+  const [user, setUser] = useState("");
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
-        Hi, Welcome back 👋
+        Hi {user.nombre} , Welcome back 👋
       </Typography>
        {/* Aquí se hace la integración con PowerBi */}
       <Grid container spacing={3}>

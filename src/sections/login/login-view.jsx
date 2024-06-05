@@ -36,7 +36,7 @@ export default function LoginView() {
 
     try {
       const response = await fetch(
-        "/api/auth/login",
+        "https://api-proyecto-sena-connect-ar-production.up.railway.app/auth/login",
         {
           method: "POST",
           headers: {
@@ -52,14 +52,26 @@ export default function LoginView() {
       }
 
       const responseData = await response.json();
-      const {token} = responseData
+      const {token, rolUsuario, nombreUsuario, ApellidoUsuario, correoUsuario} = responseData
+
+      if (rolUsuario === 4) {
+        console.log('Usuario tiene rol de admin');
+        router.push('/dashboard');
+      } else {
+        console.log('Usuario no tiene rol de admin');
+        router.push('/404');
+      }
+
       localStorage.setItem("token", token);
+
+      localStorage.setItem("user", JSON.stringify({
+        nombre: nombreUsuario,
+        apellido: ApellidoUsuario,
+        correo: correoUsuario,
+      }));
+      
       console.log("Respuesta del servidor:",token);
 
-      console.log("Si sirve");
-      router.push('/dashboard');
-
-      // Aquí podrías manejar la respuesta del servidor, por ejemplo, guardar el token de sesión en el localStorage
     } catch (error) {
       console.error(
         "Error al iniciar sesión:",
@@ -67,7 +79,7 @@ export default function LoginView() {
         correo,
         contrasena
       );
-      // setError("Credenciales incorrectas. Por favor, inténtalo de nuevo."); // Mensaje de error personalizado, podrías manejar diferentes tipos de errores aquí
+      // setError("Credenciales incorrectas. Por favor, inténtalo de nuevo."); 
     }
   };
 
@@ -75,6 +87,7 @@ export default function LoginView() {
     <>
       <Stack spacing={3}>
         <TextField 
+          required
           name="email" 
           label="Email address" 
           value={correo}
@@ -82,6 +95,7 @@ export default function LoginView() {
         />
 
         <TextField
+          required
           name="password"
           label="Password"
           value={contrasena}

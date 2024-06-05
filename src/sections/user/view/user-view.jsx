@@ -1,15 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
-import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-import CircularProgress from '@mui/material/CircularProgress'; 
+import { CircularProgress, Container, Stack, Typography, Button, Card, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -21,8 +16,6 @@ import TableEmptyRows from '../table-empty-rows';
 import UserTableToolbar from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
-// ----------------------------------------------------------------------
-
 export default function UserPage() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
@@ -31,22 +24,25 @@ export default function UserPage() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
   }, []);
-
+  
   const fetchUsers = async () => {
-    setLoading(true); 
+    setLoading(true);
     try {
-      const response = await fetch('/api/users/all-users');
+      const response = await fetch(
+        'https://api-proyecto-sena-connect-ar-production.up.railway.app/users/all-users'
+      );
       const data = await response.json();
       setUsers(data);
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
-    setLoading(false); // Ocultar indicador de carga
+    setLoading(false);
   };
 
   const handleSort = (event, uid) => {
@@ -59,18 +55,18 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = users.map((n) => n.nombre);
+      const newSelecteds = users.map((n) => n.uid);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, nombre) => {
-    const selectedIndex = selected.indexOf(nombre);
+  const handleClick = (event, uid) => {
+    const selectedIndex = selected.indexOf(uid);
     let newSelected = [];
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, nombre);
+      newSelected = newSelected.concat(selected, uid);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -98,6 +94,42 @@ export default function UserPage() {
     setFilterName(event.target.value);
   };
 
+  const handleUpdateUser = (updatedUser) => {
+    setUsers((prevUsers) =>
+      prevUsers.map((user) => (user.uid === updatedUser.uid ? updatedUser : user))
+    );
+
+    const updatedIndex = users.findIndex((user) => user.uid === updatedUser.uid);
+    if (updatedIndex !== -1) {
+      const updatedUsers = [...users];
+      updatedUsers[updatedIndex] = updatedUser;
+      setUsers(updatedUsers);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    setDeleteConfirmationOpen(true);
+  };
+
+  const confirmDeleteSelected = async () => {
+    const l = localStorage.getItem("token");
+    try {
+      await Promise.all(
+        selected.map(uid => fetch(`https://api-proyecto-sena-connect-ar-production.up.railway.app/users/${uid}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${l}`,
+          },
+        }))
+      );
+      setUsers(users.filter(user => !selected.includes(user.uid)));
+      setSelected([]);
+      setDeleteConfirmationOpen(false);
+    } catch (error) {
+      console.error('Failed to delete users:', error);
+    }
+  };
+
   const dataFiltered = applyFilter({
     inputData: users,
     comparator: getComparator(order, orderBy),
@@ -109,25 +141,23 @@ export default function UserPage() {
   return (
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h4">Usuarios</Typography>
-
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+        <Typography variant="h4">Users</Typography>
+        {/* <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
           Nuevo Usuario
-        </Button>
+        </Button> */}
       </Stack>
-
       <Card>
         <UserTableToolbar
           numSelected={selected.length}
           filterName={filterName}
           onFilterName={handleFilterByName}
+          onDeleteSelected={handleDeleteSelected}
         />
-
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             {loading ? (
               <Stack alignItems="center" justifyContent="center" sx={{ py: 3 }}>
-                <CircularProgress /> 
+                <CircularProgress />
               </Stack>
             ) : (
               <Table sx={{ minWidth: 800 }}>
@@ -155,21 +185,26 @@ export default function UserPage() {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => (
                       <UserTableRow
-                        key={row.id}
-                        name={row.nombre}
-                        secondName={row.apellido}
-                        correo={row.email}
-                        department={row.departamento}
-                        city={row.ciudad}
-                        hood={row.barrio}
-                        direction={row.direccion}
-                        gender={row.genero}
-                        selected={selected.indexOf(row.nombre) !== -1}
-                        handleClick={(event) => handleClick(event, row.nombre)}
+                        key={row.uid}
+                        nombre={row.nombre}
+                        apellido={row.apellido}
+                        email={row.email}
+                        departamento={row.departamento}
+                        ciudad={row.ciudad}
+                        barrio={row.barrio}
+                        direccion={row.direccion}
+                        genero={row.genero}
+                        uid={row.uid}
+                        selected={selected.indexOf(row.uid) !== -1}
+                        handleClick={(event) => handleClick(event, row.uid)}
+                        onUpdate={handleUpdateUser}
                       />
                     ))}
 
-                  <TableEmptyRows height={77} emptyRows={emptyRows(page, rowsPerPage, users.length)} />
+                  <TableEmptyRows
+                    height={77}
+                    emptyRows={emptyRows(page, rowsPerPage, users.length)}
+                  />
 
                   {notFound && <TableNoData query={filterName} />}
                 </TableBody>
@@ -188,6 +223,24 @@ export default function UserPage() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
+      
+      <Dialog
+        open={deleteConfirmationOpen}
+        onClose={() => setDeleteConfirmationOpen(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <p>Are you sure you want to delete the selected users?</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmationOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={confirmDeleteSelected} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

@@ -1,17 +1,22 @@
 import PropTypes from 'prop-types';
 
-import Tooltip from '@mui/material/Tooltip';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputAdornment from '@mui/material/InputAdornment';
+import { Toolbar, Typography, IconButton, Tooltip, OutlinedInput, InputAdornment } from '@mui/material';
 
 import Iconify from 'src/components/iconify';
 
-// ----------------------------------------------------------------------
+UserTableToolbar.propTypes = {
+  numSelected: PropTypes.number.isRequired,
+  filterName: PropTypes.string,
+  onFilterName: PropTypes.func,
+  onDeleteSelected: PropTypes.func,
+};
 
-export default function UserTableToolbar({ numSelected, filterName, onFilterName }) {
+export default function UserTableToolbar({
+  numSelected,
+  filterName,
+  onFilterName,
+  onDeleteSelected,
+}) {
   return (
     <Toolbar
       sx={{
@@ -25,6 +30,7 @@ export default function UserTableToolbar({ numSelected, filterName, onFilterName
         }),
       }}
     >
+
       {numSelected > 0 ? (
         <Typography component="div" variant="subtitle1">
           {numSelected} selected
@@ -47,7 +53,7 @@ export default function UserTableToolbar({ numSelected, filterName, onFilterName
 
       {numSelected > 0 ? (
         <Tooltip title="Delete">
-          <IconButton>
+          <IconButton onClick={onDeleteSelected}>
             <Iconify icon="eva:trash-2-fill" />
           </IconButton>
         </Tooltip>
@@ -61,9 +67,3 @@ export default function UserTableToolbar({ numSelected, filterName, onFilterName
     </Toolbar>
   );
 }
-
-UserTableToolbar.propTypes = {
-  numSelected: PropTypes.number,
-  filterName: PropTypes.string,
-  onFilterName: PropTypes.func,
-};

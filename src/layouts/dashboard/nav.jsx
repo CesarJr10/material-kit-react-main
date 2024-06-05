@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import {  useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -14,8 +14,6 @@ import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
 import { useResponsive } from 'src/hooks/use-responsive';
-
-import { account } from 'src/_mock/account';
 
 import Logo from 'src/components/logo';
 import Scrollbar from 'src/components/scrollbar';
@@ -37,6 +35,15 @@ export default function Nav({ openNav, onCloseNav }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  const [user, setUser] = useState("");
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
   const renderAccount = (
     <Box
       sx={{
@@ -50,14 +57,10 @@ export default function Nav({ openNav, onCloseNav }) {
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
       }}
     >
-      <Avatar src={account.photoURL} alt="photoURL" />
+      <Avatar src='/assets/images/avatars/avatar_25.jpg' alt="photoURL" />
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2">{account.displayName}</Typography>
-
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {account.role}
-        </Typography>
+        <Typography variant="subtitle2">{`${user.nombre} ${user.apellido}`}</Typography>
       </Box>
     </Box>
   );
@@ -70,14 +73,32 @@ export default function Nav({ openNav, onCloseNav }) {
     </Stack>
   );
 
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    window.location.replace('/'); // Redirigir al usuario a la página de inicio
+  };
+  
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      window.history.pushState(null, '', window.location.pathname);
+    };
+  
+    window.addEventListener('popstate', handleBeforeUnload);
+  
+    return () => {
+      window.removeEventListener('popstate', handleBeforeUnload);
+    };
+  }, []);
+
   const renderUpgrade = (
+    
     <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
       <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
         <Button
-          href=""
-          target="_blank"
+          onClick={handleLogout}
           variant="contained"
-          color="inherit"
+          color="error"
         >
           logout
         </Button>

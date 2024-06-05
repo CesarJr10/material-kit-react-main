@@ -5,10 +5,14 @@ import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
 import LoadingButton from '@mui/lab/LoadingButton';
+import FormControl from '@mui/material/FormControl';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 
@@ -41,23 +45,27 @@ export default function RegisterView() {
     e.preventDefault();
 
     try {
-      const response = await fetch('api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre,
-          apellido,
-          correo,
-          contrasena,
-          direccion,
-          ciudad,
-          departamento,
-          barrio,
-          genero,
-        }),
-      });
+      const response = await fetch(
+        'https://api-proyecto-sena-connect-ar-production.up.railway.app/auth/register',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nombre,
+            apellido,
+            correo,
+            contrasena,
+            direccion,
+            ciudad,
+            departamento,
+            barrio,
+            genero,
+            rol: 4,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -66,7 +74,7 @@ export default function RegisterView() {
 
       const responseData = await response.json();
       console.log('Respuesta del servidor:', responseData);
-    //   console.log(response.json());
+      //   console.log(response.json());
 
       setTimeout(() => {
         router.push('/');
@@ -106,6 +114,7 @@ export default function RegisterView() {
           <TextField
             required
             fullWidth
+            type="email"
             id="correo"
             label="Correo Electronico"
             name="correo"
@@ -142,15 +151,20 @@ export default function RegisterView() {
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField
-            required
-            fullWidth
-            id="genero"
-            label="Genero"
-            name="genero"
-            value={genero}
-            onChange={(e) => setGenero(e.target.value)}
-          />
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Género</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="genero"
+              value={genero}
+              label="Género"
+              onChange={(e) => setGenero(e.target.value)}
+            >
+              <MenuItem value="M">Masculino</MenuItem>
+              <MenuItem value="F">Femenino</MenuItem>
+              <MenuItem value="Otro">Otro</MenuItem>
+            </Select>
+          </FormControl>
         </Grid>
         <Grid item xs={12}>
           <TextField
@@ -224,7 +238,7 @@ export default function RegisterView() {
 
           <Typography variant="body2" sx={{ mt: 0, mb: 2 }}>
             have an account?
-            <Link variant="subtitle2" sx={{ ml: 0.5 }} href='/' >
+            <Link variant="subtitle2" sx={{ ml: 0.5 }} href="/">
               Log in
             </Link>
           </Typography>

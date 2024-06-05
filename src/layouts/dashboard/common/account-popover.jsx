@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
@@ -9,29 +9,36 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
-import { account } from 'src/_mock/account';
+// import { account } from 'src/_mock/account';
 
-// ----------------------------------------------------------------------
-
-const MENU_OPTIONS = [
-  {
-    label: 'Home',
-    icon: 'eva:home-fill',
-  },
-  {
-    label: 'Profile',
-    icon: 'eva:person-fill',
-  },
-  {
-    label: 'Settings',
-    icon: 'eva:settings-2-fill',
-  },
-];
-
-// ----------------------------------------------------------------------
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const [user, setUser] = useState("");
+  
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    window.location.replace('/'); // Redirigir al usuario a la página de inicio
+  };
+  
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      window.history.pushState(null, '', window.location.pathname);
+    };
+  
+    window.addEventListener('popstate', handleBeforeUnload);
+  
+    return () => {
+      window.removeEventListener('popstate', handleBeforeUnload);
+    };
+  }, []);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -56,15 +63,15 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={account.photoURL}
-          alt={account.displayName}
+          src='/assets/images/avatars/avatar_25.jpg'
+          
           sx={{
             width: 36,
             height: 36,
             border: (theme) => `solid 2px ${theme.palette.background.default}`,
           }}
         >
-          {account.displayName.charAt(0).toUpperCase()}
+          {/* {user.nombre.charAt(0).toUpperCase()} */}
         </Avatar>
       </IconButton>
 
@@ -85,27 +92,22 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2 }}>
           <Typography variant="subtitle2" noWrap>
-            {account.displayName}
+            {`${user.nombre} ${user.apellido}`}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
+            {user.correo}
           </Typography>
         </Box>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        {MENU_OPTIONS.map((option) => (
-          <MenuItem key={option.label} onClick={handleClose}>
-            {option.label}
-          </MenuItem>
-        ))}
-
+        
         <Divider sx={{ borderStyle: 'dashed', m: 0 }} />
 
         <MenuItem
           disableRipple
           disableTouchRipple
-          onClick={handleClose}
+          onClick={handleLogout}
           sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
         >
           Logout
