@@ -4,9 +4,19 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-import { CircularProgress, Container, Stack, Typography, Button, Card, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import {
+  Card,
+  Stack,
+  Button,
+  Dialog,
+  Container,
+  Typography,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+} from '@mui/material';
 
-import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
 import TableNoData from '../table-no-data';
@@ -30,7 +40,7 @@ export default function UserPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
-  
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -98,13 +108,6 @@ export default function UserPage() {
     setUsers((prevUsers) =>
       prevUsers.map((user) => (user.uid === updatedUser.uid ? updatedUser : user))
     );
-
-    const updatedIndex = users.findIndex((user) => user.uid === updatedUser.uid);
-    if (updatedIndex !== -1) {
-      const updatedUsers = [...users];
-      updatedUsers[updatedIndex] = updatedUser;
-      setUsers(updatedUsers);
-    }
   };
 
   const handleDeleteSelected = () => {
@@ -112,17 +115,19 @@ export default function UserPage() {
   };
 
   const confirmDeleteSelected = async () => {
-    const l = localStorage.getItem("token");
+    const l = localStorage.getItem('token');
     try {
       await Promise.all(
-        selected.map(uid => fetch(`https://api-proyecto-sena-connect-ar-production.up.railway.app/users/${uid}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${l}`,
-          },
-        }))
+        selected.map((uid) =>
+          fetch(`https://api-proyecto-sena-connect-ar-production.up.railway.app/users/${uid}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${l}`,
+            },
+          })
+        )
       );
-      setUsers(users.filter(user => !selected.includes(user.uid)));
+      setUsers(users.filter((user) => !selected.includes(user.uid)));
       setSelected([]);
       setDeleteConfirmationOpen(false);
     } catch (error) {
@@ -198,6 +203,7 @@ export default function UserPage() {
                         selected={selected.indexOf(row.uid) !== -1}
                         handleClick={(event) => handleClick(event, row.uid)}
                         onUpdate={handleUpdateUser}
+                        reloadUsers={fetchUsers}
                       />
                     ))}
 
@@ -223,11 +229,8 @@ export default function UserPage() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
-      
-      <Dialog
-        open={deleteConfirmationOpen}
-        onClose={() => setDeleteConfirmationOpen(false)}
-      >
+
+      <Dialog open={deleteConfirmationOpen} onClose={() => setDeleteConfirmationOpen(false)}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <p>Are you sure you want to delete the selected users?</p>

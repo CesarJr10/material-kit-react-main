@@ -4,6 +4,8 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import  Alert  from '@mui/material/Alert';
+import  Snackbar  from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -28,11 +30,44 @@ export default function LoginView() {
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
+  const validateFields = () => {
+    const newErrors = {};
+
+    
+    if (!correo) newErrors.correo = 'El correo electrónico es obligatorio';
+    if (!contrasena) newErrors.contrasena = 'La contraseña es obligatoria';
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
      e.preventDefault();
+
+     if (!validateFields()) return;
+
+     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!validEmail.test(correo)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          correo: 'Ingrese un correo electrónico válido',
+        }));
+        return;
+      }
 
     try {
       const response = await fetch(
@@ -73,6 +108,9 @@ export default function LoginView() {
       console.log("Respuesta del servidor:",token);
 
     } catch (error) {
+      setSnackbarSeverity('error');
+      setSnackbarMessage('Error al ingresar, credenciales incorrectas');
+      setSnackbarOpen(true);
       console.error(
         "Error al iniciar sesión:",
         error.message,
@@ -87,19 +125,23 @@ export default function LoginView() {
     <>
       <Stack spacing={3}>
         <TextField 
-          required
+          
           name="email" 
           label="Email address" 
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
+          error={!!errors.correo}
+          helperText={errors.correo}
         />
 
         <TextField
-          required
+          
           name="password"
           label="Password"
           value={contrasena}
           onChange={(e) => setContrasena(e.target.value)}
+          error={!!errors.contrsena}
+          helperText={errors.contrasena}
           type={showPassword ? 'text' : 'password'}
           InputProps={{
             endAdornment: (
@@ -132,6 +174,7 @@ export default function LoginView() {
   );
 
   return (
+    <>
     <Box component="form" onSubmit={handleSubmit}
       sx={{
         ...bgGradient({
@@ -171,5 +214,12 @@ export default function LoginView() {
         </Card>
       </Stack>
     </Box>
+    <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
+    
   );
 }

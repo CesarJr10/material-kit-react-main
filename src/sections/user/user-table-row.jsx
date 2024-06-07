@@ -32,6 +32,7 @@ export default function UserTableRow({
   genero,
   uid,
   onUpdate,
+  reloadUsers,
 }) {
   const [open, setOpen] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -84,7 +85,7 @@ export default function UserTableRow({
     const data = await response.json();
     console.log("respuesta del server:", data);
     onUpdate(uid);
-    window.location.reload();
+    reloadUsers();
   };
 
   return (
@@ -135,6 +136,7 @@ export default function UserTableRow({
         handleClose={handleDialogClose}
         user={selectedUser}
         onUpdate={onUpdate}
+        reloadUsers={reloadUsers}
       />
       <Dialog
         open={deleteConfirmationOpen}
@@ -170,4 +172,5 @@ UserTableRow.propTypes = {
   genero: PropTypes.string.isRequired,
   uid: PropTypes.any.isRequired,
   onUpdate: PropTypes.func.isRequired,
+  reloadUsers:PropTypes.func.isRequired,
 };
