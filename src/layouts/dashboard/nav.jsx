@@ -91,20 +91,20 @@ export default function Nav({ openNav, onCloseNav }) {
     };
   }, []);
 
-  const renderUpgrade = (
+  // const renderUpgrade = (
     
-    <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
-      <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
-        <Button
-          onClick={handleLogout}
-          variant="contained"
-          color="error"
-        >
-          logout
-        </Button>
-      </Stack>
-    </Box>
-  );
+  //   <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
+  //     <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
+  //       <Button
+  //         onClick={handleLogout}
+  //         variant="contained"
+  //         color="error"
+  //       >
+  //         logout
+  //       </Button>
+  //     </Stack>
+  //   </Box>
+  // );
 
   const renderContent = (
     <Scrollbar
@@ -125,7 +125,7 @@ export default function Nav({ openNav, onCloseNav }) {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      {renderUpgrade}
+      {/* {renderUpgrade} */}
     </Scrollbar>
   );
 

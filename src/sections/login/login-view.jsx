@@ -200,14 +200,14 @@ export default function LoginView() {
             maxWidth: 420,
           }}
         >
-          <Typography variant="h4">Sign in to Sena ConnectAR</Typography>
+          <Typography variant="h4" sx={{ mt: 2, mb: 5 }} >Sign in to Sena ConnectAR</Typography>
 
-          <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
+          {/* <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
             Don’t have an account?
             <Link variant="subtitle2" sx={{ ml: 0.5 }} href='/register' >
               Get started
             </Link>
-          </Typography>
+          </Typography> */}
 
           {renderForm}
 

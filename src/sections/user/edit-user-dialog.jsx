@@ -27,11 +27,13 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
   const [genero, setGenero] = useState('');
   const [direccion, setDireccion] = useState('');
   const [uid, setUid] = useState('');
+  const [emailExistsError, setEmailExistsError] = useState(false); 
 
   const [errors, setErrors] = useState({});
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  
 
   const handleSnackbarClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -71,22 +73,45 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const emailExists = async (emaill) => {
+    const response = await fetch(
+      'https://api-proyecto-sena-connect-ar-production.up.railway.app/users/all-users'
+    );
+    const users = await response.json();
+    return users.some((userr) => userr.email === emaill && userr.uid !== uid);
+  };
+
   const handleSave = async () => {
     if (!validateFields()) return;
 
-    const userData = {
-      uid,
-      nombre,
-      apellido,
-      email,
-      departamento,
-      ciudad,
-      barrio,
-      genero,
-      direccion,
-    };
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!validEmail.test(email)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        email: 'Ingrese un correo electrónico válido',
+      }));
+      return;
+    }
 
     try {
+      const exists = await emailExists(email);
+      if (exists) {
+        setEmailExistsError(true);
+        return;
+      }
+
+      const userData = {
+        uid,
+        nombre,
+        apellido,
+        email,
+        departamento,
+        ciudad,
+        barrio,
+        genero,
+        direccion,
+      };
+
       const response = await fetch(
         'https://api-proyecto-sena-connect-ar-production.up.railway.app/users/update',
         {
@@ -103,15 +128,14 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
         console.error('Error en la respuesta:', errorData);
         throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
       }
-      // const updatedUserData = await response.json();
-      // onUpdate(updatedUserData);
-      console.log("Usuario actualizado correctamente")
+
+      console.log("Usuario actualizado correctamente");
       handleClose();
 
       setSnackbarOpen(true);
       setSnackbarSeverity('success');
       setSnackbarMessage('Usuario actualizado correctamente');
-      
+
       reloadUsers();
     } catch (error) {
       console.error('Error al editar usuario:', error);
@@ -121,12 +145,10 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
     }
   };
 
-  
-
   return (
     <>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Edit User</DialogTitle>
+        <DialogTitle>Editar Usuario</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2, mt: 2 }}>
             <Grid item xs={12} sm={6}>
@@ -171,9 +193,14 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
                 label="Correo Electrónico"
                 name="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                error={!!errors.email}
-                helperText={errors.email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailExistsError(false); 
+                }}
+                error={!!errors.email || emailExistsError}
+                helperText={
+                  errors.email || (emailExistsError && 'El correo electrónico ya está en uso')
+                }
               />
             </Grid>
             <Grid item xs={12} sm={6}>

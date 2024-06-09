@@ -6,9 +6,11 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import {
   Card,
+  Alert,
   Stack,
   Button,
   Dialog,
+  Snackbar,
   Container,
   Typography,
   DialogTitle,
@@ -18,6 +20,7 @@ import {
 } from '@mui/material';
 
 import Scrollbar from 'src/components/scrollbar';
+import Iconify from 'src/components/iconify/iconify';
 
 import TableNoData from '../table-no-data';
 import UserTableRow from '../user-table-row';
@@ -36,6 +39,17 @@ export default function UserPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  // const [errors, setErrors] = useState({});
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -130,8 +144,15 @@ export default function UserPage() {
       setUsers(users.filter((user) => !selected.includes(user.uid)));
       setSelected([]);
       setDeleteConfirmationOpen(false);
+
+      setSnackbarOpen(true);
+      setSnackbarSeverity('success');
+      setSnackbarMessage('Usuario eliminado correctamente');
     } catch (error) {
       console.error('Failed to delete users:', error);
+      setSnackbarSeverity('error');
+      setSnackbarMessage('Error eliminando el usuario');
+      setSnackbarOpen(true);
     }
   };
 
@@ -144,106 +165,113 @@ export default function UserPage() {
   const notFound = !dataFiltered.length && !!filterName;
 
   return (
-    <Container>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h4">Users</Typography>
-        {/* <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
-          Nuevo Usuario
-        </Button> */}
-      </Stack>
-      <Card>
-        <UserTableToolbar
-          numSelected={selected.length}
-          filterName={filterName}
-          onFilterName={handleFilterByName}
-          onDeleteSelected={handleDeleteSelected}
-        />
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            {loading ? (
-              <Stack alignItems="center" justifyContent="center" sx={{ py: 3 }}>
-                <CircularProgress />
-              </Stack>
-            ) : (
-              <Table sx={{ minWidth: 800 }}>
-                <UserTableHead
-                  order={order}
-                  orderBy={orderBy}
-                  rowCount={users.length}
-                  numSelected={selected.length}
-                  onRequestSort={handleSort}
-                  onSelectAllClick={handleSelectAllClick}
-                  headLabel={[
-                    { id: 'nombre', label: 'Nombre' },
-                    { id: 'apellido', label: 'Apellido' },
-                    { id: 'email', label: 'Correo' },
-                    { id: 'departamento', label: 'Departamento' },
-                    { id: 'ciudad', label: 'Ciudad' },
-                    { id: 'barrio', label: 'Barrio' },
-                    { id: 'direccion', label: 'Dirección' },
-                    { id: 'genero', label: 'Género' },
-                    { id: '' },
-                  ]}
-                />
-                <TableBody>
-                  {dataFiltered
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => (
-                      <UserTableRow
-                        key={row.uid}
-                        nombre={row.nombre}
-                        apellido={row.apellido}
-                        email={row.email}
-                        departamento={row.departamento}
-                        ciudad={row.ciudad}
-                        barrio={row.barrio}
-                        direccion={row.direccion}
-                        genero={row.genero}
-                        uid={row.uid}
-                        selected={selected.indexOf(row.uid) !== -1}
-                        handleClick={(event) => handleClick(event, row.uid)}
-                        onUpdate={handleUpdateUser}
-                        reloadUsers={fetchUsers}
-                      />
-                    ))}
-
-                  <TableEmptyRows
-                    height={77}
-                    emptyRows={emptyRows(page, rowsPerPage, users.length)}
+    <>
+      <Container>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+          <Typography variant="h4">Users</Typography>
+          <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+            New User
+          </Button>
+        </Stack>
+        <Card>
+          <UserTableToolbar
+            numSelected={selected.length}
+            filterName={filterName}
+            onFilterName={handleFilterByName}
+            onDeleteSelected={handleDeleteSelected}
+          />
+          <Scrollbar>
+            <TableContainer sx={{ overflow: 'unset' }}>
+              {loading ? (
+                <Stack alignItems="center" justifyContent="center" sx={{ py: 3 }}>
+                  <CircularProgress />
+                </Stack>
+              ) : (
+                <Table sx={{ minWidth: 800 }}>
+                  <UserTableHead
+                    order={order}
+                    orderBy={orderBy}
+                    rowCount={users.length}
+                    numSelected={selected.length}
+                    onRequestSort={handleSort}
+                    onSelectAllClick={handleSelectAllClick}
+                    headLabel={[
+                      { id: 'nombre', label: 'Name' },
+                      { id: 'apellido', label: 'Second Name' },
+                      { id: 'email', label: 'Email' },
+                      { id: 'departamento', label: 'Department' },
+                      { id: 'ciudad', label: 'City' },
+                      { id: 'barrio', label: 'Hood' },
+                      { id: 'direccion', label: 'Address' },
+                      { id: 'genero', label: 'Gender' },
+                      { id: '' },
+                    ]}
                   />
+                  <TableBody>
+                    {dataFiltered
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((row) => (
+                        <UserTableRow
+                          key={row.uid}
+                          nombre={row.nombre}
+                          apellido={row.apellido}
+                          email={row.email}
+                          departamento={row.departamento}
+                          ciudad={row.ciudad}
+                          barrio={row.barrio}
+                          direccion={row.direccion}
+                          genero={row.genero}
+                          uid={row.uid}
+                          selected={selected.indexOf(row.uid) !== -1}
+                          handleClick={(event) => handleClick(event, row.uid)}
+                          onUpdate={handleUpdateUser}
+                          reloadUsers={fetchUsers}
+                        />
+                      ))}
 
-                  {notFound && <TableNoData query={filterName} />}
-                </TableBody>
-              </Table>
-            )}
-          </TableContainer>
-        </Scrollbar>
+                    <TableEmptyRows
+                      height={77}
+                      emptyRows={emptyRows(page, rowsPerPage, users.length)}
+                    />
 
-        <TablePagination
-          page={page}
-          component="div"
-          count={users.length}
-          rowsPerPage={rowsPerPage}
-          onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Card>
+                    {notFound && <TableNoData query={filterName} />}
+                  </TableBody>
+                </Table>
+              )}
+            </TableContainer>
+          </Scrollbar>
 
-      <Dialog open={deleteConfirmationOpen} onClose={() => setDeleteConfirmationOpen(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <p>Are you sure you want to delete the selected users?</p>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteConfirmationOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={confirmDeleteSelected} color="error">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+          <TablePagination
+            page={page}
+            component="div"
+            count={users.length}
+            rowsPerPage={rowsPerPage}
+            onPageChange={handleChangePage}
+            rowsPerPageOptions={[5, 10, 25]}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Card>
+
+        <Dialog open={deleteConfirmationOpen} onClose={() => setDeleteConfirmationOpen(false)}>
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <p>Are you sure you want to delete the selected user(s)?</p>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteConfirmationOpen(false)} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={confirmDeleteSelected} color="error">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+      <Snackbar open={snackbarOpen} autoHideDuration={2000} onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
