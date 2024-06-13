@@ -23,10 +23,20 @@ const navConfig = [
   //   path: '/login',
   //   icon: icon('ic_lock'),
   // },
+  // {
+  //   title: 'Not found',
+  //   path: '/404',
+  //   icon: icon('ic_disabled'),
+  // },
   {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic_disabled'),
+    title: 'marker',
+    path: '/dashboard/marker',
+    icon: icon('ic_marker'),
+  },
+  {
+    title: 'route',
+    path: '/dashboard/route',
+    icon: icon('ic_routes'),
   },
 ];
 

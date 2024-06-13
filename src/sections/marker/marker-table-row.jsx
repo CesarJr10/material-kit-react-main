@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-import  Alert  from '@mui/material/Alert';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Popover from '@mui/material/Popover';
@@ -17,28 +17,22 @@ import DialogActions from '@mui/material/DialogActions';
 
 import Iconify from 'src/components/iconify';
 
-import EditUserDialog from './edit-user-dialog';
+import EditMarkerDialog from './edit-marker-dialog';
 
 // ----------------------------------------------------------------------
 
-export default function UserTableRow({
+export default function MarkerTableRow({
   selected,
   handleClick,
   nombre,
-  apellido,
-  email,
-  ciudad,
-  departamento,
-  barrio,
-  direccion,
-  genero,
+  descripcion,
   uid,
   onUpdate,
   reloadUsers,
 }) {
   const [open, setOpen] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedMarker, setSelectedMarker] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
@@ -60,15 +54,9 @@ export default function UserTableRow({
   };
 
   const handleEditClick = () => {
-    setSelectedUser({
-      nombre,
-      apellido,
-      email,
-      ciudad,
-      departamento,
-      barrio,
-      direccion,
-      genero,
+    setSelectedMarker({
+      mar_name: nombre,
+      mar_description: descripcion,
       uid,
     });
     setDialogOpen(true);
@@ -88,7 +76,7 @@ export default function UserTableRow({
 
     try{
       const response = await fetch(
-        `https://api-proyecto-sena-connect-ar-production.up.railway.app/users/${uid}`,
+        `https://api-proyecto-sena-connect-ar-production.up.railway.app/marker/${uid}`,
         {
           method: "DELETE",
           headers: {
@@ -98,16 +86,16 @@ export default function UserTableRow({
       );
       const data = await response.json();
       console.log("respuesta del server:", data);
-      onUpdate(uid);
+      
       setSnackbarOpen(true);
       setSnackbarSeverity('success');
-      setSnackbarMessage('User deleted successfully');
-
+      setSnackbarMessage('Marker deleted successfully');
+      onUpdate(uid);
       reloadUsers();
     }catch(error){
-      console.error('Error al editar usuario:', error);
+      console.error('Error al eliminar marcador:', error);
       setSnackbarSeverity('error');
-      setSnackbarMessage('Error deleting user');
+      setSnackbarMessage('Error deleting the marker');
       setSnackbarOpen(true);
     }
     
@@ -121,13 +109,8 @@ export default function UserTableRow({
         </TableCell>
 
         <TableCell>{nombre}</TableCell>
-        <TableCell>{apellido}</TableCell>
-        <TableCell>{email}</TableCell>
-        <TableCell>{departamento}</TableCell>
-        <TableCell>{ciudad}</TableCell>
-        <TableCell>{barrio}</TableCell>
-        <TableCell>{direccion}</TableCell>
-        <TableCell>{genero}</TableCell>
+        <TableCell>{descripcion}</TableCell>
+        
         <TableCell align="right">
           <IconButton onClick={handleOpenMenu}>
             <Iconify icon="eva:more-vertical-fill" />
@@ -156,10 +139,10 @@ export default function UserTableRow({
         </MenuItem>
       </Popover>
 
-      <EditUserDialog
+      <EditMarkerDialog
         open={dialogOpen}
         handleClose={handleDialogClose}
-        user={selectedUser}
+        marker={selectedMarker} 
         onUpdate={onUpdate}
         reloadUsers={reloadUsers}
       />
@@ -169,7 +152,7 @@ export default function UserTableRow({
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <p>Are you sure you want to delete this user?</p>
+          <p>Are you sure you want to delete this marker?</p>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirmationOpen(false)} color="primary">
@@ -180,7 +163,7 @@ export default function UserTableRow({
           </Button>
         </DialogActions>
       </Dialog>
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+      <Snackbar open={snackbarOpen} autoHideDuration={4000} onClose={handleSnackbarClose}>
         <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
@@ -189,18 +172,12 @@ export default function UserTableRow({
   );
 }
 
-UserTableRow.propTypes = {
+MarkerTableRow.propTypes = {
   handleClick: PropTypes.func.isRequired,
   selected: PropTypes.bool.isRequired,
   nombre: PropTypes.string.isRequired,
-  apellido: PropTypes.string.isRequired,
-  email: PropTypes.string.isRequired,
-  ciudad: PropTypes.string.isRequired,
-  departamento: PropTypes.string.isRequired,
-  barrio: PropTypes.string.isRequired,
-  direccion: PropTypes.string.isRequired,
-  genero: PropTypes.string.isRequired,
+  descripcion: PropTypes.string.isRequired,
   uid: PropTypes.any.isRequired,
   onUpdate: PropTypes.func.isRequired,
-  reloadUsers:PropTypes.func.isRequired,
+  reloadUsers: PropTypes.func.isRequired,
 };

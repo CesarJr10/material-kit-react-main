@@ -4,7 +4,6 @@ import {  useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -15,7 +14,7 @@ import { RouterLink } from 'src/routes/components';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import Logo from 'src/components/logo';
+// import Logo from 'src/components/logo';
 import Scrollbar from 'src/components/scrollbar';
 
 import { NAV } from './config-layout';
@@ -74,10 +73,7 @@ export default function Nav({ openNav, onCloseNav }) {
   );
 
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    window.location.replace('/'); // Redirigir al usuario a la página de inicio
-  };
+  
   
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -117,7 +113,7 @@ export default function Nav({ openNav, onCloseNav }) {
         },
       }}
     >
-      <Logo sx={{ mt: 3, ml: 4 }} />
+      {/* <Logo sx={{ mt: 3, ml: 4 }} /> */}
 
       {renderAccount}
 

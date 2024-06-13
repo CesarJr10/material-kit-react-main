@@ -1,14 +1,16 @@
 import { lazy, Suspense } from 'react';
-import { Outlet, Navigate, useRoutes } from 'react-router-dom';
+import { Outlet, Navigate, useRoutes   } from 'react-router-dom';
 
 import DashboardLayout from 'src/layouts/dashboard';
+import ProtectedRoute from 'src/contexts/ProtectedRoute';  // Ajusta la ruta de importación si es necesario
 
-
-export const IndexPage    = lazy(() => import('src/pages/app'));
-export const UserPage     = lazy(() => import('src/pages/user'));
-export const LoginPage    = lazy(() => import('src/pages/login'));
-export const RegisterPage = lazy(() => import('src/pages/register'));
-export const Page404      = lazy(() => import('src/pages/page-not-found'));
+const IndexPage    = lazy(() => import('src/pages/app'));
+const UserPage     = lazy(() => import('src/pages/user'));
+const MarkerPage   = lazy(() => import('src/pages/marker'));
+const RoutePage    = lazy(() => import('src/pages/route'));
+const LoginPage    = lazy(() => import('src/pages/login'));
+// const RegisterPage = lazy(() => import('src/pages/register'));
+const Page404      = lazy(() => import('src/pages/page-not-found'));
 
 export default function Router() {
   const routes = useRoutes([
@@ -17,23 +19,27 @@ export default function Router() {
       element: <LoginPage />, // Página de inicio por defecto
     },
 
-    {
-      path: '/register',
-      element: <RegisterPage />, 
-    },
+    // {
+    //   path: '/register',
+    //   element: <RegisterPage />, 
+    // },
 
     {
       path: 'dashboard',
       element: (
-        <DashboardLayout>
-          <Suspense fallback={<div>Loading...</div>}>
-            <Outlet />
-          </Suspense>
-        </DashboardLayout>
+        <ProtectedRoute>
+          <DashboardLayout>
+            <Suspense fallback={<div>Loading...</div>}>
+              <Outlet />
+            </Suspense>
+          </DashboardLayout>
+        </ProtectedRoute>
       ),
       children: [
         { element: <IndexPage />, index: true },
         { path: 'user', element: <UserPage /> },
+        { path: 'marker', element: <MarkerPage /> },
+        { path: 'route', element: <RoutePage /> },
       ],
     },
     

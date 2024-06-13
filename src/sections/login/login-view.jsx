@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+import { useAuth } from 'src/contexts/AuthContext'; // Ajusta la ruta de importación si es necesario
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import  Alert  from '@mui/material/Alert';
-import  Snackbar  from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -13,19 +14,16 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { useRouter } from 'src/routes/hooks';
-
 import { bgGradient } from 'src/theme/css';
 
-import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
 export default function LoginView() {
   const theme = useTheme();
-
-  const router = useRouter();
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -46,9 +44,8 @@ export default function LoginView() {
   const validateFields = () => {
     const newErrors = {};
 
-    
-    if (!correo) newErrors.correo = 'El correo electrónico es obligatorio';
-    if (!contrasena) newErrors.contrasena = 'La contraseña es obligatoria';
+    if (!correo) newErrors.correo = 'Email is required';
+    if (!contrasena) newErrors.contrasena = 'Password is required';
 
     setErrors(newErrors);
 
@@ -56,18 +53,18 @@ export default function LoginView() {
   };
 
   const handleSubmit = async (e) => {
-     e.preventDefault();
+    e.preventDefault();
 
-     if (!validateFields()) return;
+    if (!validateFields()) return;
 
-     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!validEmail.test(correo)) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          correo: 'Ingrese un correo electrónico válido',
-        }));
-        return;
-      }
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!validEmail.test(correo)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        correo: 'Enter a valid email address',
+      }));
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -87,37 +84,33 @@ export default function LoginView() {
       }
 
       const responseData = await response.json();
-      const {token, rolUsuario, nombreUsuario, ApellidoUsuario, correoUsuario} = responseData
+      const { token, rolUsuario, nombreUsuario, ApellidoUsuario, correoUsuario } = responseData;
 
       if (rolUsuario === 4) {
-        console.log('Usuario tiene rol de admin');
-        router.push('/dashboard');
+        login({
+          token,
+          nombre: nombreUsuario,
+          apellido: ApellidoUsuario,
+          correo: correoUsuario,
+        });
+        navigate('/dashboard');
       } else {
-        console.log('Usuario no tiene rol de admin');
-        router.push('/404');
+        setSnackbarSeverity('error');
+        setSnackbarMessage('Error al ingresar, usuario no autorizado');
+        setSnackbarOpen(true);
       }
 
       localStorage.setItem("token", token);
-
       localStorage.setItem("user", JSON.stringify({
         nombre: nombreUsuario,
         apellido: ApellidoUsuario,
         correo: correoUsuario,
       }));
-      
-      console.log("Respuesta del servidor:",token);
-
     } catch (error) {
       setSnackbarSeverity('error');
       setSnackbarMessage('Error al ingresar, credenciales incorrectas');
       setSnackbarOpen(true);
-      console.error(
-        "Error al iniciar sesión:",
-        error.message,
-        correo,
-        contrasena
-      );
-      // setError("Credenciales incorrectas. Por favor, inténtalo de nuevo."); 
+      console.error("Error al iniciar sesión:", error.message);
     }
   };
 
@@ -125,7 +118,6 @@ export default function LoginView() {
     <>
       <Stack spacing={3}>
         <TextField 
-          
           name="email" 
           label="Email address" 
           value={correo}
@@ -135,12 +127,11 @@ export default function LoginView() {
         />
 
         <TextField
-          
           name="password"
           label="Password"
           value={contrasena}
           onChange={(e) => setContrasena(e.target.value)}
-          error={!!errors.contrsena}
+          error={!!errors.contrasena}
           helperText={errors.contrasena}
           type={showPassword ? 'text' : 'password'}
           InputProps={{
@@ -156,9 +147,9 @@ export default function LoginView() {
       </Stack>
 
       <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
-        <Link variant="subtitle2" underline="hover">
+        {/* <Link variant="subtitle2" underline="hover">
           Forgot password?
-        </Link>
+        </Link> */}
       </Stack>
 
       <LoadingButton
@@ -175,51 +166,33 @@ export default function LoginView() {
 
   return (
     <>
-    <Box component="form" onSubmit={handleSubmit}
-      sx={{
-        ...bgGradient({
-          color: alpha(theme.palette.background.default, 0.9),
-          imgUrl: '/assets/background/overlay_4.jpg',
-        }),
-        height: 1,
-      }}
-    >
-      <Logo
+      <Box component="form" onSubmit={handleSubmit}
         sx={{
-          position: 'fixed',
-          top: { xs: 16, md: 24 },
-          left: { xs: 16, md: 24 },
+          ...bgGradient({
+            color: alpha(theme.palette.background.default, 0.9),
+            imgUrl: '/assets/background/overlay_4.jpg',
+          }),
+          height: 1,
         }}
-      />
-
-      <Stack alignItems="center" justifyContent="center" sx={{ height: 1 }}>
-        <Card
-          sx={{
-            p: 5,
-            width: 1,
-            maxWidth: 420,
-          }}
-        >
-          <Typography variant="h4" sx={{ mt: 2, mb: 5 }} >Sign in to Sena ConnectAR</Typography>
-
-          {/* <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
-            Don’t have an account?
-            <Link variant="subtitle2" sx={{ ml: 0.5 }} href='/register' >
-              Get started
-            </Link>
-          </Typography> */}
-
-          {renderForm}
-
-        </Card>
-      </Stack>
-    </Box>
-    <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
+      >
+        <Stack alignItems="center" justifyContent="center" sx={{ height: 1 }}>
+          <Card
+            sx={{
+              p: 5,
+              width: 1,
+              maxWidth: 420,
+            }}
+          >
+            <Typography variant="h4" sx={{ mt: 2, mb: 5 }} >Sign in to Sena ConnectAR</Typography>
+            {renderForm}
+          </Card>
+        </Stack>
+      </Box>
+      <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
         <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>
     </>
-    
   );
 }

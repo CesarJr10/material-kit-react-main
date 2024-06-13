@@ -59,14 +59,14 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
   const validateFields = () => {
     const newErrors = {};
 
-    if (!nombre) newErrors.nombre = 'El nombre es obligatorio';
-    if (!apellido) newErrors.apellido = 'El apellido es obligatorio';
-    if (!email) newErrors.email = 'El correo electrónico es obligatorio';
-    if (!departamento) newErrors.departamento = 'El departamento es obligatorio';
-    if (!ciudad) newErrors.ciudad = 'La ciudad es obligatoria';
-    if (!barrio) newErrors.barrio = 'El barrio es obligatorio';
-    if (!genero) newErrors.genero = 'El género es obligatorio';
-    if (!direccion) newErrors.direccion = 'La dirección es obligatoria';
+    if (!nombre) newErrors.nombre = 'Name is required';
+    if (!apellido) newErrors.apellido = 'Second name is required';
+    if (!email) newErrors.email = 'Email is required';
+    if (!departamento) newErrors.departamento = 'Department is required';
+    if (!ciudad) newErrors.ciudad = 'City is required';
+    if (!barrio) newErrors.barrio = 'Neighborhood is required';
+    if (!genero) newErrors.genero = 'Gender is required';
+    if (!direccion) newErrors.direccion = 'Address is required';
 
     setErrors(newErrors);
 
@@ -88,7 +88,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
     if (!validEmail.test(email)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        email: 'Ingrese un correo electrónico válido',
+        email: 'Enter a valid email address',
       }));
       return;
     }
@@ -130,17 +130,19 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
       }
 
       console.log("Usuario actualizado correctamente");
+      
       handleClose();
+      onUpdate(userData)
 
       setSnackbarOpen(true);
       setSnackbarSeverity('success');
-      setSnackbarMessage('Usuario actualizado correctamente');
+      setSnackbarMessage('User updated successfully');
 
-      reloadUsers();
+      // reloadUsers();
     } catch (error) {
       console.error('Error al editar usuario:', error);
       setSnackbarSeverity('error');
-      setSnackbarMessage('Error actualizando el usuario');
+      setSnackbarMessage('Error updating user');
       setSnackbarOpen(true);
     }
   };
@@ -148,7 +150,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
   return (
     <>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Editar Usuario</DialogTitle>
+        <DialogTitle>Edit User</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2, mt: 2 }}>
             <Grid item xs={12} sm={6}>
@@ -165,7 +167,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
                 autoComplete="given-name"
                 name="nombre"
                 fullWidth
-                label="Nombre"
+                label="Name"
                 autoFocus
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
@@ -177,7 +179,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
               <TextField
                 required
                 fullWidth
-                label="Apellido"
+                label="Second name"
                 name="apellido"
                 value={apellido}
                 onChange={(e) => setApellido(e.target.value)}
@@ -190,7 +192,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
                 required
                 fullWidth
                 id="email"
-                label="Correo Electrónico"
+                label="Email"
                 name="email"
                 value={email}
                 onChange={(e) => {
@@ -207,7 +209,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
               <TextField
                 required
                 fullWidth
-                label="Departamento"
+                label="Department"
                 name="departamento"
                 value={departamento}
                 onChange={(e) => setDepartamento(e.target.value)}
@@ -219,7 +221,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
               <TextField
                 required
                 fullWidth
-                label="Ciudad"
+                label="City"
                 name="ciudad"
                 value={ciudad}
                 onChange={(e) => setCiudad(e.target.value)}
@@ -231,7 +233,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
               <TextField
                 required
                 fullWidth
-                label="Barrio"
+                label="Neighborhood"
                 name="barrio"
                 value={barrio}
                 onChange={(e) => setBarrio(e.target.value)}
@@ -241,17 +243,17 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth error={!!errors.genero}>
-                <InputLabel id="genero-label">Género</InputLabel>
+                <InputLabel id="genero-label">Gender</InputLabel>
                 <Select
                   labelId="genero-label"
                   id="genero"
                   value={genero}
-                  label="Género"
+                  label="Gender"
                   onChange={(e) => setGenero(e.target.value)}
                 >
-                  <MenuItem value="M">Masculino</MenuItem>
-                  <MenuItem value="F">Femenino</MenuItem>
-                  <MenuItem value="Otro">Otro</MenuItem>
+                  <MenuItem value="M">Male</MenuItem>
+                  <MenuItem value="F">Female</MenuItem>
+                  <MenuItem value="Otro">Other</MenuItem>
                 </Select>
                 {errors.genero && <p style={{ color: 'red' }}>{errors.genero}</p>}
               </FormControl>
@@ -261,7 +263,7 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
                 required
                 fullWidth
                 id="direccion"
-                label="Dirección"
+                label="Address"
                 name="direccion"
                 value={direccion}
                 onChange={(e) => setDireccion(e.target.value)}
@@ -272,8 +274,8 @@ const EditUserDialog = ({ open, handleClose, user, onUpdate, reloadUsers }) => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave}>Guardar</Button>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save</Button>
         </DialogActions>
       </Dialog>
 

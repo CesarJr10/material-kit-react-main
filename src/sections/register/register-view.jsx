@@ -18,7 +18,7 @@ import FormControl from '@mui/material/FormControl';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { useRouter } from 'src/routes/hooks';
+// import { useRouter } from 'src/routes/hooks';
 
 import { bgGradient } from 'src/theme/css';
 
@@ -30,7 +30,7 @@ import Iconify from 'src/components/iconify';
 export default function RegisterView() {
   const theme = useTheme();
 
-  const router = useRouter();
+  // const router = useRouter();
 
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
@@ -143,9 +143,9 @@ export default function RegisterView() {
       setSnackbarSeverity('success');
       setSnackbarMessage('Usuario registrado exitosamente');
 
-      setTimeout(() => {
-        router.push('/');
-      }, 4000);
+      // setTimeout(() => {
+      //   router.push('/');
+      // }, 4000);
     } catch (error) {
       setSnackbarSeverity('error');
       setSnackbarMessage('Error al registrar usuario');
