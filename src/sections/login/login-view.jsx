@@ -1,7 +1,7 @@
+import { useAuth } from 'src/contexts/AuthContext'; // Ajusta la ruta de importación si es necesario
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from 'src/contexts/AuthContext'; // Ajusta la ruta de importación si es necesario
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -13,6 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { bgGradient } from 'src/theme/css';
 
@@ -29,6 +30,7 @@ export default function LoginView() {
   const [contrasena, setContrasena] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -43,18 +45,14 @@ export default function LoginView() {
 
   const validateFields = () => {
     const newErrors = {};
-
     if (!correo) newErrors.correo = 'Email is required';
     if (!contrasena) newErrors.contrasena = 'Password is required';
-
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateFields()) return;
 
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,6 +63,8 @@ export default function LoginView() {
       }));
       return;
     }
+
+    setLoading(true);
 
     try {
       const response = await fetch(
@@ -111,15 +111,17 @@ export default function LoginView() {
       setSnackbarMessage('Error al ingresar, credenciales incorrectas');
       setSnackbarOpen(true);
       console.error("Error al iniciar sesión:", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const renderForm = (
     <>
       <Stack spacing={3}>
-        <TextField 
-          name="email" 
-          label="Email address" 
+        <TextField
+          name="email"
+          label="Email address"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
           error={!!errors.correo}
@@ -158,6 +160,8 @@ export default function LoginView() {
         type="submit"
         variant="contained"
         color="inherit"
+        loading={loading}
+        
       >
         Login
       </LoadingButton>
@@ -183,8 +187,21 @@ export default function LoginView() {
               maxWidth: 420,
             }}
           >
-            <Typography variant="h4" sx={{ mt: 2, mb: 5 }} >Sign in to Sena ConnectAR</Typography>
-            {renderForm}
+            <Typography variant="h4" sx={{ mt: 2, mb: 5 }}>Sign in to Sena ConnectAR</Typography>
+            {loading ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100px', 
+                }}
+              >
+                <CircularProgress />
+              </Box>
+            ) : (
+              renderForm
+            )}
           </Card>
         </Stack>
       </Box>
